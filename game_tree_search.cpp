@@ -13,49 +13,30 @@
 int iterate_func(const GameSpec& spec, std::vector<int> pole, int turn){
     
     std::vector<std::vector<int>> tempWinSeq = spec.getWinSeq();
-
-    std::vector<int> indices;
-
-    for (int i = 0; i < tempWinSeq.size(); i++){
+    int prev = -50;
+    for (auto& i : tempWinSeq){
 
         bool win = true;
-        for (int j = 0; j < tempWinSeq[i].size(); j++){
-
-            win = true;
-
-            if (pole[tempWinSeq[i][j]] == 0 || pole[tempWinSeq[i][j]] == -1){
+        if (pole[i[0]] == 0 || pole[i[0]] == -1){
+                continue;
+        }
+        for (auto& j : i){
+            if (pole[j] != pole[i[0]]) {
                 win = false;
                 break;
-            }
-            
-            if (j >= 1) {
-                if (tempWinSeq[i][j-1] != tempWinSeq[i][j]){
-                    win = false;
-                    indices.push_back(i);
-                    break;
-                }
-            }
-            
+            }  
         }
         if (win == true) {
-            if (tempWinSeq[i][0] == 1){
+            if (i[0] == 1){
                 return 1;
             }
-            else if (tempWinSeq[i][0] == 2){
+            else if (i[0] == 2){
                 return -1;
             }
         }
 
 
         
-    }
-
-    int temp = 0;
-    if (indices.size() > 0) {
-        for (int i = 0; i < indices.size(); i++){
-            tempWinSeq.erase(tempWinSeq.begin() + indices[i] - temp);
-            temp++;
-        }
     }
 
     bool isFull = true;
@@ -63,38 +44,42 @@ int iterate_func(const GameSpec& spec, std::vector<int> pole, int turn){
     for (int i = 0; i < pole.size(); i++){
         if (pole[i] == 0) {
             isFull = false;
+            break;
         }
     }
 
-    if (isFull == false){
+    if (isFull == true){
         return 0;
     }
 
-    turn = turn % 2;
+    turn = turn % 2; 
     int payOff = (turn == 1 ? 1 : -1);
-
+    int newPayOff;
     for (int i = 0; i < pole.size(); i++){
         
-        if (pole[i] > 0) {
+        if (pole[i] > 0 || pole[i] < 0) {
             continue;
         }
 
         pole[i] = (turn == 1 ? 1 : 2);
 
-        int newPayOff = iterate_func(spec, pole, turn+1);
+        newPayOff = iterate_func(spec, pole, turn+1);
 
         if (turn == 1) {
             if (newPayOff == 1) {
                 return 1;
             }
-            payOff = (newPayOff > payOff ? newPayOff : payOff);
+            else{
+                payOff = (newPayOff > payOff ? newPayOff : payOff);
+            }
         }
         else if (turn == 0) {
             if (newPayOff == -1){
                 return -1;
             }
-            payOff = (newPayOff < payOff ? newPayOff : payOff);
-
+            else{
+                payOff = (newPayOff < payOff ? newPayOff : payOff);
+            }
         }
 
         pole[i] = 0;
